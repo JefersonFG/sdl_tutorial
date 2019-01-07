@@ -47,3 +47,6 @@
 .history
 
 # End of https://www.gitignore.io/api/c++,visualstudiocode
+
+# Ignore compiled files
+build/*

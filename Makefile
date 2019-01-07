@@ -1,26 +1,38 @@
-#OBJS specifies which files to compile as part of the project
-OBJS = main.cpp
+CXX = g++
+BUILD_DIR = build
+OBJ_DIR = $(BUILD_DIR)/obj
+TARGET_NAME = sdl_tutorial
 
-#CC specifies which compiler we're using
-CC = g++
+SRC_DIR = src
+INCLUDE_DIR = include
 
-#INCLUDE_PATHS specifies the additional include paths we'll need
 INCLUDE_PATHS = -IC:\mingw_dev_lib\sdl_v2_x86\include\SDL2
-
-#LIBRARY_PATHS specifies the additional library paths we'll need
 LIBRARY_PATHS = -LC:\mingw_dev_lib\sdl_v2_x86\lib
 
-#COMPILER_FLAGS specifies the additional compilation options we're using
-# -w suppresses all warnings
 # -Wl,-subsystem,windows gets rid of the console window
-COMPILER_FLAGS = -w -Wl,-subsystem,windows
-
-#LINKER_FLAGS specifies the libraries we're linking against
+COMPILER_FLAGS = -Wl,-subsystem,windows
 LINKER_FLAGS = -lmingw32 -lSDL2main -lSDL2
 
-#OBJ_NAME specifies the name of our executable
-OBJ_NAME = sdl_tutorial
+_INCLUDE = constants.hpp
+INCLUDE = $(patsubst %,$(INCLUDE_DIR)/%,$(_INCLUDE))
 
-#This is the target that compiles our executable
-all : $(OBJS)
-	$(CC) $(OBJS) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(OBJ_NAME)
+_OBJ = main.o
+OBJ = $(patsubst %,$(OBJ_DIR)/%,$(_OBJ))
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp $(INCLUDE)
+	@echo Building object files
+	$(CXX) -c -o $@ $< $(INCLUDE_PATHS) $(COMPILER_FLAGS)
+
+debug: $(OBJ)
+	@echo Generating executable with debug flags
+	$(CXX) -g -o $(BUILD_DIR)/$(TARGET_NAME) $^ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS)
+
+release: $(OBJ)
+	@echo Generating executable without debug flags
+	$(CXX) -o $(BUILD_DIR)/$(TARGET_NAME) $^ $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS)
+
+.PHONY: clean
+
+clean:
+	@echo Removing object files
+	rm -f $(OBJ_DIR)/*.o
